@@ -1,1 +1,5 @@
-console.log("UnaHur - Anti-Social net");
+require('dotenv').config();
+
+const startServer = require('./server');
+
+startServer();
