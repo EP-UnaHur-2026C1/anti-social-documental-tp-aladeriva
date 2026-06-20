@@ -1,7 +1,12 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
 
 const userSchema = new mongoose.Schema({
-  nickName: { type: String, required: true, unique: true },
-}, { timestamps: true });
+  nickName: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true
+  }
+});
 
-export default mongoose.model('User', userSchema);
+module.exports = mongoose.model('User', userSchema);
