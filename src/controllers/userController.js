@@ -1,7 +1,4 @@
-// src/controllers/userController.js
-
-const { User } = require('../db/schema/userSchema');
-const { validateUser } = require('../middlewares/validation');
+const User = require('../models/User');
 
 // Obtener todos los usuarios
 const getUsers = async (req, res) => {
@@ -16,8 +13,8 @@ const getUsers = async (req, res) => {
 // Crear un nuevo usuario
 const createUser = async (req, res) => {
   try {
-    const { nickName, password } = req.body;
-    const user = await User.create({ _id: nickName, nickName, password });
+    const { nickName } = req.body;
+    const user = await User.create({ nickName });
     res.status(201).json(user);
   } catch (error) {
     if (error.code === 11000) {
@@ -31,7 +28,7 @@ const createUser = async (req, res) => {
 const deleteUser = async (req, res) => {
   try {
     const { nickName } = req.params;
-    const result = await User.findByIdAndDelete(nickName);
+    const result = await User.findOneAndDelete({ nickName });
 
     if (!result) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -43,37 +40,30 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// Actualizar la contraseña de un usuario
+// Actualizar nombre a un usuario
 const updateUser = async (req, res) => {
   try {
     const { nickName } = req.params;
-    const { password } = req.body;
-
-    if (!password) {
-      return res.status(400).json({ message: "La contraseña es obligatoria." });
-    }
-
-    const user = await User.findByIdAndUpdate(
-      nickName,
-      { password },
-      { new: true }
-    );
+    const { newNickName } = req.body;
+    const user = await User.findOne({ nickName });
 
     if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+      return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    res.status(200).json({ message: "Contraseña actualizada correctamente" });
+    user.nickName = newNickName;
+    await user.save();
+    res.json(user);
   } catch (error) {
-    res.status(500).json({ message: "Error al actualizar usuario", error });
+    return res.status(400).json({ error: error.message });
   }
 };
 
 // Obtener un usuario por nickName
-const getUserById = async (req, res) => {
+const getUserBynickname = async (req, res) => {
   try {
     const { nickName } = req.params;
-    const user = await User.find({nickName: nickName});
+    const user = await User.findOne({ nickName });
 
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -90,6 +80,6 @@ module.exports = {
   getUsers,
   deleteUser,
   updateUser,
-  getUserById,
+  getUserBynickname
 
 };
