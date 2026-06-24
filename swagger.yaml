@@ -1,0 +1,327 @@
+openapi: 3.0.0
+info:
+  title: UnaHur Anti-Social API
+  version: 1.0.0
+  description: API para la red social UnaHur Anti-Social Net
+servers:
+  - url: http://localhost:3000
+paths:
+  # ============ USERS ============
+  /api/users:
+    get:
+      summary: Obtener todos los usuarios
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Crear nuevo usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickName: { type: string, example: "juanperez" }
+      responses:
+        '201': { description: Creado }
+        '409': { description: NickName ya existe }
+  /api/users/{nickName}:
+    get:
+      summary: Obtener usuario por nickName
+      parameters:
+        - name: nickName
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+        '404': { description: No encontrado }
+    put:
+      summary: Actualizar usuario (solo nickName)
+      parameters:
+        - name: nickName
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickName: { type: string }
+      responses:
+        '200': { description: Actualizado }
+        '404': { description: No encontrado }
+    delete:
+      summary: Eliminar usuario
+      parameters:
+        - name: nickName
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Eliminado }
+        '404': { description: No encontrado }
+
+  # ============ FOLLOW ============
+  /api/follow:
+    post:
+      summary: Seguir a un usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                follower_nickname: { type: string }
+                followed_nickname: { type: string }
+      responses:
+        '201': { description: Seguido exitosamente }
+        '400': { description: No puedes seguirte a ti mismo }
+        '409': { description: Ya sigues a este usuario }
+    delete:
+      summary: Dejar de seguir a un usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                follower_nickname: { type: string }
+                followed_nickname: { type: string }
+      responses:
+        '200': { description: Dejaste de seguir }
+        '404': { description: No sigues a este usuario }
+  /api/follow/{nickname}/following:
+    get:
+      summary: Obtener a quiénes sigue un usuario
+      parameters:
+        - name: nickname
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+  /api/follow/{nickname}/followers:
+    get:
+      summary: Obtener seguidores de un usuario
+      parameters:
+        - name: nickname
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+
+  # ============ POSTS ============
+  /api/posts:
+    get:
+      summary: Obtener todos los posts (con caché Redis)
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Crear un nuevo post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [description, nickName]
+              properties:
+                description: { type: string, example: "Mi primer post" }
+                nickName: { type: string, example: "juanperez" }
+                tags: { type: array, items: { type: string }, example: ["tecnologia", "node"] }
+      responses:
+        '201': { description: Creado }
+        '404': { description: Usuario no encontrado }
+  /api/posts/{id}:
+    get:
+      summary: Obtener post por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+        '404': { description: No encontrado }
+    put:
+      summary: Actualizar descripción de un post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description: { type: string }
+      responses:
+        '200': { description: Actualizado }
+    delete:
+      summary: Eliminar post
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Eliminado }
+
+  # ============ COMMENTS ============
+  /api/posts/{postId}/comments:
+    post:
+      summary: Agregar comentario a un post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                text: { type: string }
+                nickName: { type: string }
+      responses:
+        '201': { description: Comentario agregado }
+  /api/posts/{postId}/comments/{commentId}:
+    delete:
+      summary: Eliminar un comentario
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: commentId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Eliminado }
+
+  # ============ IMAGES ============
+  /api/posts/{postId}/images:
+    post:
+      summary: Asociar URL de imagen a un post (después de subir)
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                imageUrl: { type: string, example: "/uploads/img-123.jpg" }
+      responses:
+        '201': { description: Imagen agregada }
+  /api/posts/{postId}/images/{imageId}:
+    delete:
+      summary: Eliminar imagen de un post
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema: { type: string }
+        - name: imageId
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Eliminada }
+
+  # ============ IMAGE UPLOAD ============
+  /api/images/upload:
+    post:
+      summary: Subir archivo de imagen (multipart/form-data)
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: URL de la imagen subida
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  imageUrl: { type: string, example: "/uploads/img-123456.jpg" }
+
+  # ============ TAGS ============
+  /api/tags:
+    get:
+      summary: Obtener todas las etiquetas
+      responses:
+        '200': { description: OK }
+    post:
+      summary: Crear nueva etiqueta
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+      responses:
+        '201': { description: Creada }
+        '400': { description: Ya existe }
+  /api/tags/{id}:
+    get:
+      summary: Obtener etiqueta por ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: OK }
+    put:
+      summary: Actualizar nombre de etiqueta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+      responses:
+        '200': { description: Actualizada }
+    delete:
+      summary: Eliminar etiqueta
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        '200': { description: Eliminada }

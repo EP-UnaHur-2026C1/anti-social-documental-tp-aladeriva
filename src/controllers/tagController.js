@@ -10,6 +10,20 @@ const getTags = async (req, res, next) => {
   }
 };
 
+const getTagById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const tag = await Tag.findById(id).select('-__v');
+    if (!tag) {
+      return res.status(404).json({ message: 'Tag no encontrado' });
+    }
+    res.json(tag);
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 const createTag = async (req, res, next) => {
   try {
     const { error } = validateTag(req.body);
@@ -26,6 +40,27 @@ const createTag = async (req, res, next) => {
   }
 };
 
+
+const updateTag = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { name } = req.body;
+    if (!name) return res.status(400).json({ message: 'El nombre es obligatorio' });
+    const tag = await Tag.findByIdAndUpdate(id, { name }, { new: true, runValidators: true }).select('-__v');
+    if (!tag) {
+      return res.status(404).json({ message: 'Tag no encontrado' });
+    }
+    res.json(tag);
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(400).json({ message: 'El nombre de tag ya existe' });
+    }
+    next(error);
+  }
+};
+
+
+
 const deleteTag = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -39,4 +74,4 @@ const deleteTag = async (req, res, next) => {
   }
 };
 
-module.exports = { getTags, createTag, deleteTag };
+module.exports = { getTags, createTag, deleteTag, getTagById, updateTag };

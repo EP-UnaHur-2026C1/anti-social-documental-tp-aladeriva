@@ -1,4 +1,6 @@
 const { Router } = require('express');
+const schemaValidator = require("../middlewares/schemaValidator.js");
+const postCreateSchema = require("../schema/postCreateSchema.js")
 
 const {
   getPosts,
@@ -17,7 +19,7 @@ const router = Router();
 router.get('/', getPosts);
 router.get('/:id', getPostById);
 
-router.post('/', createPost);
+router.post('/', schemaValidator(postCreateSchema), createPost);
 
 router.put('/:id', updatePost);
 

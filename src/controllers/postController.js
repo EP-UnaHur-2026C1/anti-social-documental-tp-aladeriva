@@ -1,6 +1,28 @@
+const Post = require('../models/Post');
+const User = require('../models/User');
+const Tag = require('../models/Tag');
+const { getRedisClient } = require('../config/redis');
+
+const CACHE_TTL = parseInt(process.env.CACHE_TTL) || 60;
 
 // --- getAllPosts con filtro de comentarios ---
 const getAllPosts = async (req, res) => {
+    try {
+        const redis = getRedisClient();
+        let posts = null;
+
+        // 1. Intentar leer desde caché
+        if (redis && redis.isOpen) {
+            const cached = await redis.get('posts:all');
+            if (cached) {
+                posts = JSON.parse(cached);
+                return res.status(200).json(posts);
+            }
+        }
+    } catch (error) {
+        console.error('Error al obtener posts desde caché:', error);
+    }
+
     try {
         const monthsEnv = process.env.COMMENT_AGE_MONTHS;
         let monthsToSubtract = 6;
@@ -29,8 +51,13 @@ const getAllPosts = async (req, res) => {
 
             return postObj;
         });
-
+        
         return res.status(200).json(filteredPosts);
+
+        if (redis && redis.isOpen) {
+            await redis.setEx('posts:all', CACHE_TTL, JSON.stringify(posts));
+        }
+         return res.status(200).json(posts);
 
     } catch (error) {
         console.error('Error en getAllPosts:', error);
@@ -51,10 +78,14 @@ const createPost = async (req, res) => {
 
         const newPost = await Post.create({
             description,
-            author: nickName // ahora es nickName
+            user: author._id 
         });
-        
 
+        const redis = getRedisClient();
+        if (redis && redis.isOpen) {
+            await redis.del('posts:all');
+        }
+        
         res.status(201).json(newPost);
     } catch (error) {
         res.status(500).json({ message: 'Error al crear el post', error: error.message });
@@ -112,6 +143,11 @@ const addComment = async (req, res) => {
 
     await post.save();
 
+    const redis = getRedisClient();
+        if (redis && redis.isOpen) {
+            await redis.del('posts:all');
+        }
+
     res.status(201).json(
       post.comments[post.comments.length - 1]
     );
@@ -143,6 +179,11 @@ const addImageToPost = async (req, res) => {
         });
 
         await post.save();
+
+        const redis = getRedisClient();
+        if (redis && redis.isOpen) {
+            await redis.del('posts:all');
+        }
 
         res.status(201).json(
             post.images[post.images.length - 1]
@@ -192,6 +233,11 @@ const deletePost = async (req, res) => {
         const { id } = req.params;
         const result = await Post.deleteOne({ _id: id });
         if (result.deletedCount === 0) return res.status(404).json({ message: "Post no encontrado" });
+
+        const redis = getRedisClient();
+        if (redis && redis.isOpen) {
+            await redis.del('posts:all');
+        }
         res.status(200).json({ message: "Post eliminado" });
     } catch (error) {
         res.status(500).json({ message: "Error al eliminar el post", error: error.message });
@@ -206,6 +252,11 @@ const updatePost = async (req, res) => {
         if (!description) return res.status(400).json({ message: "La descripción es obligatoria." });
         const updatedPost = await Post.findByIdAndUpdate(id, { description }, { new: true });
         if (!updatedPost) return res.status(404).json({ message: "Post no encontrado" });
+
+        const redis = getRedisClient();
+        if (redis && redis.isOpen) {
+            await redis.del('posts:all');
+        }
         res.status(200).json({ message: "Descripción actualizada correctamente", post: updatedPost });
     } catch (error) {
         res.status(500).json({ message: "Error al actualizar el post", error: error.message });
@@ -229,6 +280,11 @@ const getCommentsByPostId = async (req, res) => {
             return res.status(400).json({
                 message: 'El postId no es válido.'
             });
+        }
+
+        const redis = getRedisClient();
+        if (redis && redis.isOpen) {
+            await redis.del('posts:all');
         }
         res.status(500).json({
             message: error.message
