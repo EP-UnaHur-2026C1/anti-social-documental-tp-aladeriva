@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const schemaValidator = require("../middlewares/schemaValidator.js");
 const userSchema = require("../schema/userSchema.js");
-const userUpdateSchema = require("../schema/userUpdateSchema.js");
+
 const {
   getUsers,
   getUserBynickname,
