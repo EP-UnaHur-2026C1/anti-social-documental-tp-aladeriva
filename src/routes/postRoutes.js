@@ -1,6 +1,4 @@
 const { Router } = require('express');
-const schemaValidator = require("../middlewares/schemaValidator.js");
-const postCreateSchema = require("../schema/postCreateSchema.js")
 
 const {
   getPosts,
@@ -19,7 +17,7 @@ const router = Router();
 router.get('/', getPosts);
 router.get('/:id', getPostById);
 
-router.post('/', schemaValidator(postCreateSchema), createPost);
+router.post('/', createPost);
 
 router.put('/:id', updatePost);
 
@@ -31,4 +29,4 @@ router.delete('/:id/comments/:commentId', deleteCommentFromPost);
 router.post('/:id/images', addImageToPost);
 router.delete('/:id/images/:imageId', deleteImageFromPost);
 
-module.exports = router;
+module.exports = router;                      
