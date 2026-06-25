@@ -54,7 +54,7 @@ const getAllPosts = async (req, res) => {
         
 
         if (redis && redis.isOpen) {
-            await redis.setEx('posts:all', CACHE_TTL, JSON.stringify(posts));
+            await redis.setEx('posts:all', CACHE_TTL, JSON.stringify(filteredPosts));
         }
         return res.status(200).json(filteredPosts);
 
@@ -224,6 +224,41 @@ const addComment = async (req, res) => {
   }
 };
 
+
+const deleteCommentFromPost = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res.status(404).json({
+        message: 'Post no encontrado'
+      });
+    }
+
+    post.comments.pull(commentId);
+
+    await post.save();
+
+    const redis = getRedisClient();
+    if (redis && redis.isOpen) {
+      await redis.del('posts:all');
+    }
+
+    res.status(200).json({
+      message: 'Comentario eliminado'
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error al eliminar comentario',
+      error: error.message
+    });
+  }
+};
+
+
 // --- addImageToPost ---
 const addImageToPost = async (req, res) => {
     try {
@@ -388,6 +423,7 @@ module.exports = {
     getPostById,
     createPost,
     addComment,
+    deleteCommentFromPost,
     deletePost,
     updatePost,
     addTagToPost,

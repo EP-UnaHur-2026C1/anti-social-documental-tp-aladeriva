@@ -27,8 +27,8 @@ const createUser = async (req, res) => {
 // Eliminar un usuario por nickName
 const deleteUser = async (req, res) => {
   try {
-    const { nickName } = req.params;
-    const result = await User.findOneAndDelete({ nickName });
+    const { id } = req.params;
+    const result = await User.findByIdAndDelete(id);
 
     if (!result) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -43,15 +43,15 @@ const deleteUser = async (req, res) => {
 // Actualizar nombre a un usuario
 const updateUser = async (req, res) => {
   try {
-    const { nickName } = req.params;
-    const { newNickName } = req.body;
-    const user = await User.findOne({ nickName });
+    const { id } = req.params;
+    const { nickName } = req.body;
+    const user = await User.findById(id);
 
     if (!user) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
-    user.nickName = newNickName;
+    user.nickName = nickName;
     await user.save();
     res.json(user);
   } catch (error) {
@@ -60,10 +60,10 @@ const updateUser = async (req, res) => {
 };
 
 // Obtener un usuario por nickName
-const getUserBynickname = async (req, res) => {
+const getUserById = async (req, res) => {
   try {
-    const { nickName } = req.params;
-    const user = await User.findOne({ nickName });
+    const { id } = req.params;
+    const user = await User.findById(id);
 
     if (!user) {
       return res.status(404).json({ message: "Usuario no encontrado" });
@@ -80,6 +80,6 @@ module.exports = {
   getUsers,
   deleteUser,
   updateUser,
-  getUserBynickname
+  getUserById
 
 };

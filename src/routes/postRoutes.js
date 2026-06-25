@@ -9,6 +9,8 @@ const tagSchema = require("../schema/tagSchema.js");
 const {
   getAllPosts,
   getPostById,
+  getCommentsByPostId,
+  getImagesByPostId,
   createPost,
   updatePost,
   deletePost,
@@ -22,18 +24,20 @@ const {
 const router = Router();
 
 router.get('/', getAllPosts);
-router.get('/:id', getPostById);
+router.get('/:postId', getPostById);
+router.get('/:postId/comments', getCommentsByPostId);
+router.get('/:postId/images', getImagesByPostId);
 
 router.post('/', schemaValidator(createPostSchema),createPost);
-router.post('/:id/comments',schemaValidator(addCommentSchema),addComment);
-router.post('/:id/images', schemaValidator(addImageSchema),addImageToPost);
-router.post('/:id/tag', schemaValidator(tagSchema),addTagToPost);
+router.post('/:postId/comments',schemaValidator(addCommentSchema),addComment);
+router.post('/:postId/images', schemaValidator(addImageSchema),addImageToPost);
+router.post('/:postId/tag', schemaValidator(tagSchema),addTagToPost);
 
 router.put('/:id',validateObjectId,validaExisteMiddleware(Post),updatePost);
 
 router.delete('/:id', deletePost);
-//router.delete('/:id/comments/:commentId', deleteCommentFromPost);
-router.delete('/:id/images/:imageId', removeImageFromPost);
+router.delete('/:postId/comments/:commentId', deleteCommentFromPost);
+router.delete('/:postId/images/:imageId', removeImageFromPost);
 
 
 

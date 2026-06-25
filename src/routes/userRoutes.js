@@ -5,7 +5,7 @@ const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe
 const User = require("../models/User.js");
 const {
   getUsers,
-  getUserBynickname,
+  getUserById,
   createUser,
   updateUser,
   deleteUser,
@@ -14,9 +14,9 @@ const {
 const router = Router();
 
 router.get('/', getUsers);
-router.get('/:nickName', getUserBynickname);
+router.get('/:id',validateObjectId, validaExisteMiddleware(User), getUserById);
 router.post('/', schemaValidator(userSchema), createUser);
-router.put('/:nickName',validateObjectId,validaExisteMiddleware(User), updateUser);
-router.delete('/:nickName', deleteUser);
+router.put('/:id',validateObjectId,validaExisteMiddleware(User), updateUser);
+router.delete('/:id',validateObjectId, validaExisteMiddleware(User), deleteUser);
 
 module.exports = router;
