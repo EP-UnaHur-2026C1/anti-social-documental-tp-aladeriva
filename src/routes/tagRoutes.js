@@ -1,5 +1,8 @@
 const { Router } = require('express');
-
+const Tag = require("../models/Tag.js");
+const schemaValidator = require("../middlewares/schemaValidator");
+const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe.middleware");
+const tagSchema= require("../schema/tagSchema.js");
 const {
   getTags,
   getTagById,
@@ -13,10 +16,10 @@ const router = Router();
 router.get('/', getTags);
 router.get('/:id', getTagById);
 
-router.post('/', createTag);
+router.post('/',schemaValidator(tagSchema),createTag);
 
-router.put('/:id', updateTag);
+router.put('/:id',validateObjectId,validaExisteMiddleware(Tag),updateTag);
 
-router.delete('/:id', deleteTag);
+router.delete('/:id',validateObjectId,validaExisteMiddleware(Tag),deleteTag);
 
 module.exports = router;

@@ -52,12 +52,11 @@ const getAllPosts = async (req, res) => {
             return postObj;
         });
         
-        return res.status(200).json(filteredPosts);
 
         if (redis && redis.isOpen) {
             await redis.setEx('posts:all', CACHE_TTL, JSON.stringify(posts));
         }
-         return res.status(200).json(posts);
+        return res.status(200).json(filteredPosts);
 
     } catch (error) {
         console.error('Error en getAllPosts:', error);
@@ -68,7 +67,72 @@ const getAllPosts = async (req, res) => {
         });
     }
 };
+const getPostById = async (req, res) => {
+    try {
+        const { postId } = req.params;
 
+        const redis = getRedisClient();
+
+        if (redis && redis.isOpen) {
+            const cached = await redis.get(`post:${postId}`);
+
+            if (cached) {
+                return res.status(200).json(JSON.parse(cached));
+            }
+        }
+
+        const monthsEnv = process.env.COMMENT_AGE_MONTHS;
+        let monthsToSubtract = 6;
+
+        if (monthsEnv !== undefined && !isNaN(parseInt(monthsEnv, 10))) {
+            monthsToSubtract = parseInt(monthsEnv, 10);
+        }
+
+        const cutoffDate = new Date();
+        cutoffDate.setMonth(cutoffDate.getMonth() - monthsToSubtract);
+
+        const post = await Post.findById(postId)
+            .populate('user', 'nickName')
+            .populate('tags', 'name')
+            .populate('comments.user', 'nickName');
+
+        if (!post) {
+            return res.status(404).json({
+                message: 'Post no encontrado'
+            });
+        }
+
+        const postObj = post.toObject();
+
+        postObj.comments = postObj.comments.filter(comment =>
+            comment.visible === true &&
+            new Date(comment.createdAt) >= cutoffDate
+        );
+
+        if (redis && redis.isOpen) {
+            await redis.setEx(
+                `post:${postId}`,
+                CACHE_TTL,
+                JSON.stringify(postObj)
+            );
+        }
+
+        return res.status(200).json(postObj);
+
+    } catch (error) {
+
+        if (error.kind === 'ObjectId') {
+            return res.status(400).json({
+                message: 'El postId no es válido.'
+            });
+        }
+
+        return res.status(500).json({
+            message: 'Error al obtener el post',
+            error: error.message
+        });
+    }
+};
 // --- createPost ---
 const createPost = async (req, res) => {
     try {
@@ -321,6 +385,7 @@ const getImagesByPostId = async (req, res) => {
 
 module.exports = {
     getAllPosts,
+    getPostById,
     createPost,
     addComment,
     deletePost,

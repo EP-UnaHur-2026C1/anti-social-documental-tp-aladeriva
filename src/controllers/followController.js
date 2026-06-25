@@ -1,6 +1,4 @@
-const {User} = require ('../db/schema/userSchema');
-const { Follower } = require('../db/schema/FollowersSchema')
- 
+
 const followUser = async (req, res) => {
   try {
     const { follower_nickname, followed_nickname } = req.body;

@@ -1,5 +1,5 @@
 const Tag = require('../models/Tag');
-const { validateTag } = require('../middlewares/validation');
+
 
 const getTags = async (req, res, next) => {
   try {
@@ -26,12 +26,9 @@ const getTagById = async (req, res, next) => {
 
 const createTag = async (req, res, next) => {
   try {
-    const { error } = validateTag(req.body);
-    if (error) return res.status(400).json({ message: error.details[0].message });
-
     const tag = new Tag(req.body);
     await tag.save();
-    res.status(201).json(tag);
+    return res.status(201).json(tag);
   } catch (error) {
     if (error.code === 11000) {
       return res.status(400).json({ message: 'La etiqueta ya existe' });

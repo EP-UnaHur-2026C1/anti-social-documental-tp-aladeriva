@@ -1,7 +1,8 @@
 const { Router } = require('express');
 const schemaValidator = require("../middlewares/schemaValidator.js");
 const userSchema = require("../schema/userSchema.js");
-
+const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe.middleware.js");
+const User = require("../models/User.js");
 const {
   getUsers,
   getUserBynickname,
@@ -15,7 +16,7 @@ const router = Router();
 router.get('/', getUsers);
 router.get('/:nickName', getUserBynickname);
 router.post('/', schemaValidator(userSchema), createUser);
-router.put('/:nickName', schemaValidator(userSchema), updateUser);
+router.put('/:nickName',validateObjectId,validaExisteMiddleware(User), updateUser);
 router.delete('/:nickName', deleteUser);
 
 module.exports = router;
