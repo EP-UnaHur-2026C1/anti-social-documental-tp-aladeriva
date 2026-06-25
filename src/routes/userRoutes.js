@@ -1,7 +1,7 @@
 const { Router } = require('express');
 const schemaValidator = require("../middlewares/schemaValidator.js");
 const userSchema = require("../schema/userSchema.js");
-const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe.middleware.js");
+const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe.Middleware.js");
 const User = require("../models/User.js");
 const {
   getUsers,

@@ -1,22 +1,24 @@
 const { Router } = require('express');
 
 const {
-  getFollows,
-  getFollowById,
-  createFollow,
-  updateFollow,
-  deleteFollow,
+  followUser,
+  unfollowUser,
+  getFollowing,
+  getFollowers,
 } = require('../controllers/followController');
 
 const router = Router();
 
-router.get('/', getFollows);
-router.get('/:id', getFollowById);
+// Seguir a un usuario
+router.post('/', followUser);
 
-router.post('/', createFollow);
+// Dejar de seguir
+router.delete('/', unfollowUser);
 
-router.put('/:id', updateFollow);
+// Obtener a quiénes sigue un usuario
+router.get('/:nickname/following', getFollowing);
 
-router.delete('/:id', deleteFollow);
+// Obtener seguidores de un usuario
+router.get('/:nickname/followers', getFollowers);
 
 module.exports = router;
