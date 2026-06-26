@@ -1,7 +1,7 @@
 const Post = require("../models/Post.js");
 const { Router } = require('express');
 const schemaValidator = require("../middlewares/schemaValidator");
-const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe.middleware");
+const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe.middleware.js");
 const createPostSchema = require("../schema/createPostSchema.js");
 const addCommentSchema = require("../schema/addCommentSchema.js");
 const addImageSchema= require("../schema/addImageSchema.js");

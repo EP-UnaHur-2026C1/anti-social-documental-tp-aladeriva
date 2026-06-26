@@ -1,6 +1,6 @@
 const app = require('./app');
 const connectDB = require('./config/db');
-const { connectRedis } = require('./config/redis');
+//const { connectRedis } = require('./config/redis');
 const userRoutes = require('./routes/userRoutes');
 const postRoutes = require('./routes/postRoutes');
 const tagRoutes = require('./routes/tagRoutes');
@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 const startServer = () => {
   connectDB().then(() => {
-    connectRedis();
+    // connectRedis();
     app.use('/users', userRoutes);
     app.use('/posts', postRoutes);
     app.use('/tags', tagRoutes);
