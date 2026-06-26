@@ -33,7 +33,7 @@ router.post('/:postId/comments',schemaValidator(addCommentSchema),addComment);
 router.post('/:postId/images', schemaValidator(addImageSchema),addImageToPost);
 router.post('/:postId/tag', schemaValidator(tagSchema),addTagToPost);
 
-router.put('/:postId',validateObjectId(),validaExisteMiddleware(Post,'postId'),updatePost);
+router.put('/:postId',validateObjectId('postId'),validaExisteMiddleware(Post,'postId'),updatePost);
 
 router.delete('/:postId',validateObjectId('postId'),validaExisteMiddleware(Post,'postId'), deletePost);
 router.delete('/:postId/comments/:commentId', validateObjectId('postId'),validateObjectId('commentId'),validaExisteMiddleware(Post,'postId'),deleteCommentFromPost);

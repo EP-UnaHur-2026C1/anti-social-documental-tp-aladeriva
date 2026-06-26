@@ -16,7 +16,7 @@ const router = Router();
 router.post('/',schemaValidator(followSchema),followUser);
 
 // Dejar de seguir
-router.delete('/',validateObjectId(),validaExisteMiddleware(Follow),unfollowUser);
+router.delete('/', schemaValidator(followSchema), unfollowUser);
 
 // Obtener a quiénes sigue un usuario
 router.get('/:nickname/following', getFollowing);

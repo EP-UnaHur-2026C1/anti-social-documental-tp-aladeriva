@@ -5,14 +5,17 @@ const Follow = require('../models/Follow');
 
 const followUser = async (req, res) => {
   try {
-    const { follower_nickname, followed_nickname } = req.body;
+    let { follower_nickname, followed_nickname } = req.body;
 
-    // Validación: no seguirse a sí mismo
+    follower_nickname = follower_nickname.trim().toLowerCase();
+    followed_nickname = followed_nickname.trim().toLowerCase();
+
     if (follower_nickname === followed_nickname) {
-      return res.status(400).json({ message: "No puedes seguirte a ti mismo." });
+      return res.status(400).json({
+        message: "No puedes seguirte a ti mismo."
+      });
     }
 
-    // Verificar que ambos usuarios existan
     const follower = await User.findOne({ nickName: follower_nickname });
     const followed = await User.findOne({ nickName: followed_nickname });
 
@@ -24,8 +27,7 @@ const followUser = async (req, res) => {
       return res.status(404).json({ message: "El usuario a seguir no existe." });
     }
 
-    // Verificar si ya lo sigue
-    const existingFollow = await Follower.findOne({
+    const existingFollow = await Follow.findOne({
       follower_nickname,
       followed_nickname,
     });
@@ -34,13 +36,20 @@ const followUser = async (req, res) => {
       return res.status(409).json({ message: "Ya sigues a este usuario." });
     }
 
-    // Crear relación
-    await Follower.create({ follower_nickname, followed_nickname });
+    await Follow.create({
+      follower_nickname,
+      followed_nickname
+    });
 
-    res.status(201).json({ message: "Usuario seguido exitosamente." });
+    return res.status(201).json({
+      message: "Usuario seguido exitosamente."
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error al seguir al usuario." });
+    return res.status(500).json({
+      message: "Error al seguir al usuario",
+      error: error.message
+    });
   }
 };
 
@@ -55,7 +64,7 @@ const getFollowing = async (req, res) => {
     }
 
     // Buscar a quiénes sigue
-    const following = await Follower.find({ follower_nickname: nickname });
+    const following = await Follow.find({ follower_nickname: nickname });
 
     const followingNicknames = following.map(f => f.followed_nickname);
     const followingUsers = await User.find(
@@ -81,7 +90,7 @@ const getFollowers = async (req, res) => {
     }
 
     // Buscar quiénes lo siguen
-    const followers = await Follower.find({ followed_nickname: nickname });
+    const followers = await Follow.find({ followed_nickname: nickname });
 
     // Obtener datos completos de esos seguidores
     const followerNicknames = followers.map(f => f.follower_nickname);
@@ -100,23 +109,27 @@ const getFollowers = async (req, res) => {
 
 const unfollowUser = async (req, res) => {
   try {
-    const { follower_nickname, followed_nickname } = req.body;
-
-    const follow = await Follower.findOne({
+    let { follower_nickname, followed_nickname } = req.body;
+    follower_nickname = follower_nickname.trim().toLowerCase();
+    followed_nickname = followed_nickname.trim().toLowerCase();
+    const follow = await Follow.findOne({
       follower_nickname,
       followed_nickname,
     });
-
     if (!follow) {
-      return res.status(404).json({ message: "No sigues a este usuario." });
+      return res.status(404).json({
+        message: "No sigues a este usuario."
+      });
     }
-
     await follow.deleteOne();
-
-    res.status(200).json({ message: "Dejaste de seguir al usuario." });
+    return res.status(200).json({
+      message: "Dejaste de seguir al usuario."
+    });
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Error al dejar de seguir al usuario." });
+    return res.status(500).json({
+      message: "Error al dejar de seguir al usuario.",
+      error: error.message
+    });
   }
 };
 

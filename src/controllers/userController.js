@@ -13,14 +13,20 @@ const getUsers = async (req, res) => {
 // Crear un nuevo usuario
 const createUser = async (req, res) => {
   try {
-    const { nickName } = req.body;
+    let { nickName } = req.body;
+    nickName = nickName.trim().toLowerCase();
     const user = await User.create({ nickName });
-    res.status(201).json(user);
+    return res.status(201).json(user);
   } catch (error) {
     if (error.code === 11000) {
-      return res.status(409).json({ message: "Error: El nickName ya existe." });
+      return res.status(409).json({
+        message: "Error: El nickName ya existe."
+      });
     }
-    res.status(500).json({ message: "Error al crear usuario", error });
+    return res.status(500).json({
+      message: "Error al crear usuario",
+      error: error.message
+    });
   }
 };
 

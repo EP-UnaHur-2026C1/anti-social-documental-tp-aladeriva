@@ -346,17 +346,17 @@ const deletePost = async (req, res) => {
 // --- updatePost ---
 const updatePost = async (req, res) => {
     try {
-        const { id } = req.params;
+        const { postId } = req.params;
         const { description } = req.body;
         if (!description) return res.status(400).json({ message: "La descripción es obligatoria." });
-        const updatedPost = await Post.findByIdAndUpdate(id, { description }, { new: true });
+        const updatedPost = await Post.findByIdAndUpdate(postId, { description }, { new: true });
         if (!updatedPost) return res.status(404).json({ message: "Post no encontrado" });
 
         const redis = getRedisClient();
         if (redis && redis.isOpen) {
             await redis.del('posts:all');
         }
-        res.status(200).json({ message: "Descripción actualizada correctamente", post: updatedPost });
+        res.status(200).json({ message: "Descripción actualizada correctamente", post: updatedPost.description });
     } catch (error) {
         res.status(500).json({ message: "Error al actualizar el post", error: error.message });
     }
