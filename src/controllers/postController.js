@@ -228,7 +228,6 @@ const addComment = async (req, res) => {
 const deleteCommentFromPost = async (req, res) => {
   try {
     const { postId, commentId } = req.params;
-
     const post = await Post.findById(postId);
 
     if (!post) {
@@ -237,10 +236,15 @@ const deleteCommentFromPost = async (req, res) => {
       });
     }
 
+    const comment = post.comments.id(commentId);
+    if (!comment) {
+      return res.status(404).json({
+        message: 'Comentario no encontrado'
+      });
+    }
+
     post.comments.pull(commentId);
-
     await post.save();
-
     const redis = getRedisClient();
     if (redis && redis.isOpen) {
       await redis.del('posts:all');
@@ -249,7 +253,7 @@ const deleteCommentFromPost = async (req, res) => {
     res.status(200).json({
       message: 'Comentario eliminado'
     });
-
+    
   } catch (error) {
     res.status(500).json({
       message: 'Error al eliminar comentario',
