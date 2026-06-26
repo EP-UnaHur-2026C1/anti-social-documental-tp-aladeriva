@@ -15,6 +15,7 @@ const {
   updatePost,
   deletePost,
   addComment,
+  updateCommentVisibility,
   deleteCommentFromPost,
   addImageToPost,
   addTagToPost,
@@ -33,7 +34,9 @@ router.post('/:postId/comments',schemaValidator(addCommentSchema),addComment);
 router.post('/:postId/images', schemaValidator(addImageSchema),addImageToPost);
 router.post('/:postId/tag', schemaValidator(tagSchema),addTagToPost);
 
+
 router.put('/:postId',validateObjectId('postId'),validaExisteMiddleware(Post,'postId'),updatePost);
+router.put('/:postId/comments/:commentId/visibility',validateObjectId('postId'),validateObjectId('commentId'),validaExisteMiddleware(Post, 'postId'),updateCommentVisibility);
 
 router.delete('/:postId',validateObjectId('postId'),validaExisteMiddleware(Post,'postId'), deletePost);
 router.delete('/:postId/comments/:commentId', validateObjectId('postId'),validateObjectId('commentId'),validaExisteMiddleware(Post,'postId'),deleteCommentFromPost);

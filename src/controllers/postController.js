@@ -224,7 +224,33 @@ const addComment = async (req, res) => {
   }
 };
 
+const updateCommentVisibility = async (req, res) => {
+  try {
+    const { postId, commentId } = req.params;
+    const { visible } = req.body;
+    const post = await Post.findById(postId);
+    const comment = post.comments.id(commentId);
 
+    if (!comment) {
+      return res.status(404).json({
+        message: 'Comentario no encontrado'
+      });
+    }
+
+    comment.visible = visible;
+    await post.save();
+
+    res.status(200).json({
+      message: 'Visibilidad actualizada',
+      comment
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: error.message
+    });
+  }
+};
 const deleteCommentFromPost = async (req, res) => {
   try {
     const { postId, commentId } = req.params;
@@ -253,7 +279,7 @@ const deleteCommentFromPost = async (req, res) => {
     res.status(200).json({
       message: 'Comentario eliminado'
     });
-    
+
   } catch (error) {
     res.status(500).json({
       message: 'Error al eliminar comentario',
@@ -317,17 +343,24 @@ const removeImageFromPost = async (req, res) => {
         message: 'Post no encontrado'
       });
     }
+    const image = post.images.id(imageId);
+    if (!image) {
+      return res.status(404).json({
+        message: 'Imagen no encontrada'
+      });
+    }
     post.images.pull(imageId);
     await post.save();
     res.status(200).json({
       message: 'Imagen eliminada'
     });
+
   } catch (error) {
     res.status(500).json({
       message: error.message
     });
   }
-}; 
+};
 
 
 // --- deletePost ---
@@ -427,6 +460,7 @@ module.exports = {
     getPostById,
     createPost,
     addComment,
+    updateCommentVisibility,
     deleteCommentFromPost,
     deletePost,
     updatePost,
