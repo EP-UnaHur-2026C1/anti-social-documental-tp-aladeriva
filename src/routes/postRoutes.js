@@ -1,5 +1,5 @@
-const Post = require("../models/Post.js");
 const { Router } = require('express');
+const Post = require("../models/Post.js");
 const schemaValidator = require("../middlewares/schemaValidator");
 const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe.middleware.js");
 const createPostSchema = require("../schema/createPostSchema.js");
@@ -24,20 +24,20 @@ const {
 const router = Router();
 
 router.get('/', getAllPosts);
-router.get('/:postId', getPostById);
-router.get('/:postId/comments', getCommentsByPostId);
-router.get('/:postId/images', getImagesByPostId);
+router.get('/:postId', validateObjectId('postId'),validaExisteMiddleware(Post, 'postId'),getPostById);
+router.get('/:postId/comments', validateObjectId('postId'),validaExisteMiddleware(Post, 'postId'),getCommentsByPostId);
+router.get('/:postId/images', validateObjectId('postId'),validaExisteMiddleware(Post, 'postId'),getImagesByPostId);
 
 router.post('/', schemaValidator(createPostSchema),createPost);
 router.post('/:postId/comments',schemaValidator(addCommentSchema),addComment);
 router.post('/:postId/images', schemaValidator(addImageSchema),addImageToPost);
 router.post('/:postId/tag', schemaValidator(tagSchema),addTagToPost);
 
-router.put('/:id',validateObjectId,validaExisteMiddleware(Post),updatePost);
+router.put('/:postId',validateObjectId(),validaExisteMiddleware(Post,'postId'),updatePost);
 
-router.delete('/:id', deletePost);
-router.delete('/:postId/comments/:commentId', deleteCommentFromPost);
-router.delete('/:postId/images/:imageId', removeImageFromPost);
+router.delete('/:postId',validateObjectId('postId'),validaExisteMiddleware(Post,'postId'), deletePost);
+router.delete('/:postId/comments/:commentId', validateObjectId('postId'),validateObjectId('commentId'),validaExisteMiddleware(Post,'postId'),deleteCommentFromPost);
+router.delete('/:postId/images/:imageId', validateObjectId('postId'),validateObjectId('imageId'),validaExisteMiddleware(Post,'postId'),removeImageFromPost);
 
 
 

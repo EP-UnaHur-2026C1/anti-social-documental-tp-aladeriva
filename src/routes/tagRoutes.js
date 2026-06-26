@@ -14,12 +14,12 @@ const {
 const router = Router();
 
 router.get('/', getTags);
-router.get('/:id', getTagById);
+router.get('/:id', validateObjectId('id'),validaExisteMiddleware(Tag, 'id'),getTagById);
 
 router.post('/',schemaValidator(tagSchema),createTag);
 
-router.put('/:id',validateObjectId,validaExisteMiddleware(Tag),updateTag);
+router.put('/:id',validateObjectId(),validaExisteMiddleware(Tag),updateTag);
 
-router.delete('/:id',validateObjectId,validaExisteMiddleware(Tag),deleteTag);
+router.delete('/:id',validateObjectId(),validaExisteMiddleware(Tag),deleteTag);
 
 module.exports = router;

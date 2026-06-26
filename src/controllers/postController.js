@@ -7,8 +7,8 @@ const CACHE_TTL = parseInt(process.env.CACHE_TTL) || 60;
 
 // --- getAllPosts con filtro de comentarios ---
 const getAllPosts = async (req, res) => {
+    const redis = getRedisClient();
     try {
-        const redis = getRedisClient();
         let posts = null;
 
         // 1. Intentar leer desde caché
@@ -329,8 +329,8 @@ const removeImageFromPost = async (req, res) => {
 // --- deletePost ---
 const deletePost = async (req, res) => {
     try {
-        const { id } = req.params;
-        const result = await Post.deleteOne({ _id: id });
+        const { postId } = req.params;
+        const result = await Post.deleteOne({ _id: postId });
         if (result.deletedCount === 0) return res.status(404).json({ message: "Post no encontrado" });
 
         const redis = getRedisClient();

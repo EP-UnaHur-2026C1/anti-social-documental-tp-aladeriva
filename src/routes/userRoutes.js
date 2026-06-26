@@ -14,9 +14,9 @@ const {
 const router = Router();
 
 router.get('/', getUsers);
-router.get('/:id',validateObjectId, validaExisteMiddleware(User), getUserById);
+router.get('/:id',validateObjectId(), validaExisteMiddleware(User), getUserById);
 router.post('/', schemaValidator(userSchema), createUser);
-router.put('/:id',validateObjectId,validaExisteMiddleware(User), updateUser);
-router.delete('/:id',validateObjectId, validaExisteMiddleware(User), deleteUser);
+router.put('/:id',validateObjectId(),validaExisteMiddleware(User), updateUser);
+router.delete('/:id',validateObjectId(), validaExisteMiddleware(User), deleteUser);
 
 module.exports = router;

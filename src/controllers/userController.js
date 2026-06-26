@@ -59,7 +59,7 @@ const updateUser = async (req, res) => {
   }
 };
 
-// Obtener un usuario por nickName
+// Obtener un usuario por id
 const getUserById = async (req, res) => {
   try {
     const { id } = req.params;

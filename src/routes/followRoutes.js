@@ -1,5 +1,8 @@
 const { Router } = require('express');
-
+const schemaValidator = require("../middlewares/schemaValidator");
+const {validateObjectId,validaExisteMiddleware} = require("../middlewares/existe.middleware.js");
+const Follow = require("../models/Follow.js");
+const followSchema = require("../schema/followSchema.js");
 const {
   followUser,
   unfollowUser,
@@ -10,10 +13,10 @@ const {
 const router = Router();
 
 // Seguir a un usuario
-router.post('/', followUser);
+router.post('/',schemaValidator(followSchema),followUser);
 
 // Dejar de seguir
-router.delete('/', unfollowUser);
+router.delete('/',validateObjectId(),validaExisteMiddleware(Follow),unfollowUser);
 
 // Obtener a quiénes sigue un usuario
 router.get('/:nickname/following', getFollowing);

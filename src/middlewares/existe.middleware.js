@@ -1,21 +1,23 @@
 const mongoose = require('mongoose');
 
-const validateObjectId = (req, res, next) => {
-    const { id } = req.params;
+const validateObjectId = (paramName = 'id') => {
+    return (req, res, next) => {
+        const id = req.params[paramName];
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({
-            message: 'El id no es válido'
-        });
-    }
+        if (!mongoose.Types.ObjectId.isValid(id)) {
+            return res.status(400).json({
+                message: `${paramName} no es válido`
+            });
+        }
 
-    next();
+        next();
+    };
 };
 
-const validaExisteMiddleware = (Modelo) => {
+const validaExisteMiddleware = (Modelo, paramName = 'id') => {
     return async (req, res, next) => {
         try {
-            const { id } = req.params;
+            const id = req.params[paramName];
             const registro = await Modelo.findById(id);
             if (!registro) {
                 return res.status(404).json({
